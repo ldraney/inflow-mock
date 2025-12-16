@@ -191,33 +191,34 @@ class SeededRandom {
 
 // Template data
 const categoryNames = [
-  'Fasteners', 'Raw Materials', 'Bearings', 'Electronics', 'Hydraulics',
-  'Seals & Gaskets', 'Safety Equipment', 'Tooling', 'Electrical', 'Lubricants',
-  'Abrasives', 'Packaging', 'Pneumatics', 'Motors', 'Pumps',
+  'Face Care', 'Body Care', 'Hair Care', 'Fragrances', 'Color Cosmetics',
+  'Nail Care', 'Sun Protection', 'Skincare Treatments', 'Lip Products',
+  'Eye Products', 'Raw Ingredients', 'Packaging Materials', 'Bath & Shower',
+  'Men\'s Grooming', 'Gift Sets',
 ]
 
 const locationNames = [
   { name: 'Main Warehouse', abbr: 'MAIN' },
-  { name: 'Secondary Storage', abbr: 'SEC' },
-  { name: 'Production Floor', abbr: 'PROD' },
-  { name: 'Receiving Dock', abbr: 'RECV' },
-  { name: 'Shipping Area', abbr: 'SHIP' },
+  { name: 'Climate Controlled Storage', abbr: 'CCS' },
+  { name: 'Production Lab', abbr: 'LAB' },
+  { name: 'Quality Control', abbr: 'QC' },
+  { name: 'Packaging & Fulfillment', abbr: 'PACK' },
 ]
 
 const vendorNames = [
-  'Precision Fasteners Inc', 'Allied Steel Supply', 'Midwest Industrial Components',
-  'Global Electronics Distributors', 'National Bearing Company', 'Thompson Plastics',
-  'Valley Machine Parts', 'Premier Rubber Products', 'Central Hydraulics',
-  'United Electrical Supply', 'American Tubing Corp', 'Quality Seal Systems',
-  'Industrial Adhesives Ltd', 'Metro Packaging Solutions', 'Coastal Abrasives',
+  'Pure Botanicals Supply', 'Global Fragrance House', 'Essential Oils International',
+  'ColorTech Pigments', 'Pacific Cosmetic Ingredients', 'Alpine Naturals',
+  'Premier Packaging Solutions', 'Cosmetic Glass & Bottles', 'BioActive Compounds Ltd',
+  'Luxe Label Printing', 'Skin Science Labs', 'Aromatics Direct',
+  'Sustainable Beauty Supplies', 'Crystal Clear Containers', 'Natural Preservatives Co',
 ]
 
 const customerNames = [
-  'Acme Manufacturing', 'Summit Industries', 'Pinnacle Products', 'Atlas Fabrication',
-  'Frontier Engineering', 'Apex Machining', 'Prime Assembly', 'Titan Manufacturing',
-  'Sterling Products', 'Vanguard Industries', 'Eagle Precision', 'Liberty Manufacturing',
-  'Patriot Products', 'Champion Industries', 'Victory Manufacturing', 'Horizon Fabrication',
-  'Pioneer Products', 'Guardian Manufacturing', 'Sentinel Industries', 'Phoenix Assembly',
+  'Radiant Beauty Co', 'Glow Cosmetics', 'Pure Skin Boutique', 'Luxe Beauty Supply',
+  'Natural Glow Distributors', 'Bella Cosmetics Retail', 'Urban Beauty Collective', 'Velvet Touch Spas',
+  'Fresh Face Salons', 'Elite Beauty Stores', 'Harmony Wellness Centers', 'Pristine Beauty Group',
+  'Coastal Beauty Supply', 'Evergreen Apothecary', 'Modern Beauty Market', 'Serenity Day Spas',
+  'Divine Beauty Boutique', 'Essence Beauty Co', 'Bloom Cosmetics Chain', 'Aurora Skincare Shops',
 ]
 
 const teamMemberNames = [
@@ -229,39 +230,58 @@ const teamMemberNames = [
 ]
 
 const adjustmentReasonNames = [
-  'Damaged Goods', 'Cycle Count Adjustment', 'Shrinkage', 'Found Inventory',
-  'Quality Rejection', 'Expired Product', 'Customer Return', 'Sample/Demo',
+  'Damaged Packaging', 'Cycle Count Adjustment', 'Shrinkage', 'Found Inventory',
+  'QC Rejection', 'Expired Product', 'Customer Return', 'Samples/Testers',
 ]
 
 const operationTypeNames = [
-  'Assembly', 'Machining', 'Welding', 'Painting', 'Inspection',
-  'Packaging', 'Testing', 'Heat Treatment',
+  'Blending', 'Mixing', 'Filling', 'Labeling', 'Quality Testing',
+  'Packaging', 'Fragrance Addition', 'Batch Approval',
 ]
 
 const productTemplates = [
-  { prefix: 'HB', name: 'Hex Bolt', category: 'Fasteners', uom: 'EA', manufacturable: false },
-  { prefix: 'SC', name: 'Socket Cap Screw', category: 'Fasteners', uom: 'EA', manufacturable: false },
-  { prefix: 'HN', name: 'Hex Nut', category: 'Fasteners', uom: 'EA', manufacturable: false },
-  { prefix: 'SP', name: 'Steel Plate', category: 'Raw Materials', uom: 'EA', manufacturable: false },
-  { prefix: 'AB', name: 'Aluminum Bar', category: 'Raw Materials', uom: 'EA', manufacturable: false },
-  { prefix: 'BB', name: 'Ball Bearing', category: 'Bearings', uom: 'EA', manufacturable: false },
-  { prefix: 'RB', name: 'Roller Bearing', category: 'Bearings', uom: 'EA', manufacturable: false },
-  { prefix: 'PS', name: 'Proximity Sensor', category: 'Electronics', uom: 'EA', manufacturable: false },
-  { prefix: 'MC', name: 'Motor Controller', category: 'Electronics', uom: 'EA', manufacturable: true },
-  { prefix: 'HC', name: 'Hydraulic Cylinder', category: 'Hydraulics', uom: 'EA', manufacturable: true },
-  { prefix: 'HH', name: 'Hydraulic Hose', category: 'Hydraulics', uom: 'EA', manufacturable: false },
-  { prefix: 'OR', name: 'O-Ring', category: 'Seals & Gaskets', uom: 'EA', manufacturable: false },
-  { prefix: 'GS', name: 'Gasket Set', category: 'Seals & Gaskets', uom: 'EA', manufacturable: true },
-  { prefix: 'SG', name: 'Safety Glasses', category: 'Safety Equipment', uom: 'EA', manufacturable: false },
-  { prefix: 'WG', name: 'Work Gloves', category: 'Safety Equipment', uom: 'PR', manufacturable: false },
-  { prefix: 'EM', name: 'End Mill', category: 'Tooling', uom: 'EA', manufacturable: false },
-  { prefix: 'DB', name: 'Drill Bit', category: 'Tooling', uom: 'EA', manufacturable: false },
-  { prefix: 'WR', name: 'Wire Spool', category: 'Electrical', uom: 'RL', manufacturable: false },
-  { prefix: 'MT', name: 'Motor', category: 'Motors', uom: 'EA', manufacturable: true },
-  { prefix: 'GW', name: 'Grinding Wheel', category: 'Abrasives', uom: 'EA', manufacturable: false },
+  // Finished Products (manufacturable)
+  { prefix: 'LP', name: 'Lipstick', category: 'Lip Products', uom: 'EA', manufacturable: true },
+  { prefix: 'LG', name: 'Lip Gloss', category: 'Lip Products', uom: 'EA', manufacturable: true },
+  { prefix: 'FD', name: 'Foundation', category: 'Face Care', uom: 'EA', manufacturable: true },
+  { prefix: 'CC', name: 'Concealer', category: 'Face Care', uom: 'EA', manufacturable: true },
+  { prefix: 'BL', name: 'Blush', category: 'Color Cosmetics', uom: 'EA', manufacturable: true },
+  { prefix: 'MS', name: 'Mascara', category: 'Eye Products', uom: 'EA', manufacturable: true },
+  { prefix: 'ES', name: 'Eyeshadow Palette', category: 'Eye Products', uom: 'EA', manufacturable: true },
+  { prefix: 'EL', name: 'Eyeliner', category: 'Eye Products', uom: 'EA', manufacturable: true },
+  { prefix: 'MO', name: 'Moisturizer', category: 'Skincare Treatments', uom: 'EA', manufacturable: true },
+  { prefix: 'SR', name: 'Serum', category: 'Skincare Treatments', uom: 'EA', manufacturable: true },
+  { prefix: 'FM', name: 'Face Mask', category: 'Face Care', uom: 'EA', manufacturable: true },
+  { prefix: 'CL', name: 'Cleanser', category: 'Face Care', uom: 'EA', manufacturable: true },
+  { prefix: 'TN', name: 'Toner', category: 'Face Care', uom: 'EA', manufacturable: true },
+  { prefix: 'SP', name: 'Sunscreen', category: 'Sun Protection', uom: 'EA', manufacturable: true },
+  { prefix: 'NP', name: 'Nail Polish', category: 'Nail Care', uom: 'EA', manufacturable: true },
+  { prefix: 'SH', name: 'Shampoo', category: 'Hair Care', uom: 'EA', manufacturable: true },
+  { prefix: 'CD', name: 'Conditioner', category: 'Hair Care', uom: 'EA', manufacturable: true },
+  { prefix: 'PF', name: 'Perfume', category: 'Fragrances', uom: 'EA', manufacturable: true },
+  { prefix: 'BW', name: 'Body Wash', category: 'Bath & Shower', uom: 'EA', manufacturable: true },
+  { prefix: 'BT', name: 'Body Lotion', category: 'Body Care', uom: 'EA', manufacturable: true },
+  // Raw Ingredients (not manufacturable - purchased)
+  { prefix: 'SB', name: 'Shea Butter', category: 'Raw Ingredients', uom: 'KG', manufacturable: false },
+  { prefix: 'CO', name: 'Coconut Oil', category: 'Raw Ingredients', uom: 'L', manufacturable: false },
+  { prefix: 'JO', name: 'Jojoba Oil', category: 'Raw Ingredients', uom: 'L', manufacturable: false },
+  { prefix: 'VE', name: 'Vitamin E', category: 'Raw Ingredients', uom: 'KG', manufacturable: false },
+  { prefix: 'HA', name: 'Hyaluronic Acid', category: 'Raw Ingredients', uom: 'KG', manufacturable: false },
+  { prefix: 'PG', name: 'Pigment Powder', category: 'Raw Ingredients', uom: 'KG', manufacturable: false },
+  { prefix: 'FR', name: 'Fragrance Oil', category: 'Raw Ingredients', uom: 'L', manufacturable: false },
+  { prefix: 'EM', name: 'Emulsifier', category: 'Raw Ingredients', uom: 'KG', manufacturable: false },
+  { prefix: 'PR', name: 'Preservative', category: 'Raw Ingredients', uom: 'KG', manufacturable: false },
+  { prefix: 'GL', name: 'Glycerin', category: 'Raw Ingredients', uom: 'L', manufacturable: false },
+  // Packaging Materials (not manufacturable - purchased)
+  { prefix: 'BX', name: 'Gift Box', category: 'Packaging Materials', uom: 'EA', manufacturable: false },
+  { prefix: 'TB', name: 'Tube Container', category: 'Packaging Materials', uom: 'EA', manufacturable: false },
+  { prefix: 'JR', name: 'Glass Jar', category: 'Packaging Materials', uom: 'EA', manufacturable: false },
+  { prefix: 'BT', name: 'Pump Bottle', category: 'Packaging Materials', uom: 'EA', manufacturable: false },
+  { prefix: 'LB', name: 'Product Label', category: 'Packaging Materials', uom: 'EA', manufacturable: false },
 ]
 
-const sizes = ['Small', 'Medium', 'Large', 'XL', '1/4"', '3/8"', '1/2"', '3/4"', '1"', 'M6', 'M8', 'M10', 'M12']
+// Cosmetics sizes/variants - shades, sizes, and formulations
+const sizes = ['Rose', 'Nude', 'Berry', 'Coral', 'Mauve', '30ml', '50ml', '100ml', '200ml', 'SPF 30', 'SPF 50', 'Matte', 'Dewy']
 
 export function generate(options: GenerateOptions = {}): BaselineData {
   // Apply preset defaults, then override with explicit options
@@ -340,8 +360,8 @@ export function generate(options: GenerateOptions = {}): BaselineData {
     name: loc.name,
     abbreviation: loc.abbr,
     isActive: true,
-    isShippable: loc.abbr === 'SHIP',
-    isReceivable: loc.abbr === 'RECV' || loc.abbr === 'MAIN',
+    isShippable: loc.abbr === 'PACK' || loc.abbr === 'MAIN',
+    isReceivable: loc.abbr === 'MAIN' || loc.abbr === 'CCS',
     timestamp: rng.timestamp(),
   }))
 
@@ -357,10 +377,10 @@ export function generate(options: GenerateOptions = {}): BaselineData {
   }))
 
   const customFieldDefinitions: CustomFieldDefinition[] = [
-    { customFieldDefinitionId: rng.uuid(), label: 'Project Code', propertyName: 'custom1', customFieldType: 'text', entityType: 'salesOrder', isActive: true },
+    { customFieldDefinitionId: rng.uuid(), label: 'Batch Number', propertyName: 'custom1', customFieldType: 'text', entityType: 'salesOrder', isActive: true },
     { customFieldDefinitionId: rng.uuid(), label: 'Priority', propertyName: 'custom2', customFieldType: 'dropdown', entityType: 'salesOrder', isActive: true },
-    { customFieldDefinitionId: rng.uuid(), label: 'Approved By', propertyName: 'custom1', customFieldType: 'text', entityType: 'purchaseOrder', isActive: true },
-    { customFieldDefinitionId: rng.uuid(), label: 'Bin Location', propertyName: 'custom1', customFieldType: 'text', entityType: 'product', isActive: true },
+    { customFieldDefinitionId: rng.uuid(), label: 'QC Approved By', propertyName: 'custom1', customFieldType: 'text', entityType: 'purchaseOrder', isActive: true },
+    { customFieldDefinitionId: rng.uuid(), label: 'Shelf Life (months)', propertyName: 'custom1', customFieldType: 'text', entityType: 'product', isActive: true },
   ]
 
   const customFieldDropdownOptions: CustomFieldDropdownOption[] = [
@@ -435,13 +455,35 @@ export function generate(options: GenerateOptions = {}): BaselineData {
 
     const productId = rng.uuid()
     const sku = `${template.prefix}-${rng.range(1000, 9999)}`
-    const unitPrice = rng.rangeFloat(5, 500).toFixed(2)
-    const cost = (parseFloat(unitPrice) * rng.rangeFloat(0.4, 0.7)).toFixed(2)
+
+    // Price varies by category: raw ingredients are cheaper, finished products range from $8-$150
+    let unitPrice: string
+    if (template.category === 'Raw Ingredients') {
+      unitPrice = rng.rangeFloat(5, 80).toFixed(2) // per kg/L - bulk ingredients
+    } else if (template.category === 'Packaging Materials') {
+      unitPrice = rng.rangeFloat(0.5, 5).toFixed(2) // packaging is cheap per unit
+    } else if (template.category === 'Fragrances') {
+      unitPrice = rng.rangeFloat(45, 200).toFixed(2) // perfumes are premium
+    } else {
+      unitPrice = rng.rangeFloat(8, 85).toFixed(2) // standard cosmetics range
+    }
+    const cost = (parseFloat(unitPrice) * rng.rangeFloat(0.25, 0.5)).toFixed(2)
+
+    // Build appropriate product name based on category
+    let productName: string
+    let productDesc: string
+    if (template.category === 'Raw Ingredients' || template.category === 'Packaging Materials') {
+      productName = template.name
+      productDesc = `${template.name} - ${template.uom}`
+    } else {
+      productName = `${template.name} ${size}`
+      productDesc = `${template.name} - ${size} variant`
+    }
 
     products.push({
       productId,
-      name: `${template.name} ${size}`,
-      description: `${template.name} - ${size} size`,
+      name: productName,
+      description: productDesc,
       sku,
       itemType: template.manufacturable ? 'Assembly' : 'Stock',
       isActive: true,

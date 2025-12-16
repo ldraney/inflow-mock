@@ -1,6 +1,6 @@
 # inflow-mock
 
-Generate comprehensive mock data for the inflow-get schema. Proves deep expertise with the data model and provides realistic test data for demos.
+Generate comprehensive mock data for cosmetics manufacturing using the inflow-get schema. Provides realistic test data for beauty product manufacturing demos including skincare, makeup, hair care, and fragrances.
 
 ## Current Status
 
@@ -10,6 +10,7 @@ Generate comprehensive mock data for the inflow-get schema. Proves deep expertis
 - [x] Database schema (uses inflow-get schema, 38 tables)
 - [x] Complete baseline generator (all tables populated)
 - [x] Works as npm library (importable by other projects)
+- [x] Cosmetics-specific product catalog (finished products, raw ingredients, packaging)
 
 ## Quick Start
 
@@ -22,7 +23,7 @@ npm run generate -- --seed=12345           # Reproducible output
 
 ## What This Repo Produces
 
-A SQLite DB with **comprehensive mock data** covering all 37 tables in the inflow-get schema.
+A SQLite DB with **comprehensive cosmetics manufacturing mock data** covering all 38 tables in the inflow-get schema.
 
 ```
 data/
@@ -44,35 +45,58 @@ db.insert(schema.customers).values(data.customers).run()
 // ... etc
 ```
 
+## Cosmetics Product Categories
+
+### Finished Products (Manufacturable)
+- **Face Care**: Foundation, Concealer, Face Mask, Cleanser, Toner
+- **Color Cosmetics**: Blush, Eyeshadow Palette
+- **Eye Products**: Mascara, Eyeliner
+- **Lip Products**: Lipstick, Lip Gloss
+- **Skincare**: Moisturizer, Serum, Sunscreen
+- **Hair Care**: Shampoo, Conditioner
+- **Body Care**: Body Lotion, Body Wash
+- **Fragrances**: Perfume
+- **Nail Care**: Nail Polish
+
+### Raw Ingredients (Purchased)
+- Shea Butter, Coconut Oil, Jojoba Oil
+- Vitamin E, Hyaluronic Acid, Glycerin
+- Pigment Powder, Fragrance Oil
+- Emulsifier, Preservative
+
+### Packaging Materials (Purchased)
+- Gift Box, Tube Container, Glass Jar
+- Pump Bottle, Product Label
+
 ## Table Coverage
 
 ### Reference Data (9 tables)
-- [x] categories (12 records)
-- [x] locations (3 records)
+- [x] categories (12 records) - Face Care, Body Care, Hair Care, Fragrances, etc.
+- [x] locations (3 records) - Main Warehouse, Climate Controlled, Production Lab, QC, Packaging
 - [x] currencies (1 record)
 - [x] paymentTerms (4 records)
 - [x] pricingSchemes (3 records)
 - [x] taxingSchemes (2 records)
 - [x] taxCodes (3 records)
-- [x] adjustmentReasons (8 records)
-- [x] operationTypes (8 records)
+- [x] adjustmentReasons (8 records) - includes QC Rejection, Expired Product
+- [x] operationTypes (8 records) - Blending, Mixing, Filling, Labeling, QC Testing
 
 ### Team & Custom Fields (4 tables)
 - [x] teamMembers (5 records)
-- [x] customFieldDefinitions (4 records)
+- [x] customFieldDefinitions (4 records) - Batch Number, Shelf Life, QC Approved By
 - [x] customFieldDropdownOptions (1 record)
 - [x] customFields (1 record)
 
 ### Core Entities (3 tables)
-- [x] vendors (15 records)
-- [x] customers (20 records)
-- [x] products (100 records)
+- [x] vendors (15 records) - ingredient & packaging suppliers
+- [x] customers (20 records) - beauty retailers, spas, distributors
+- [x] products (100 records) - cosmetics, ingredients, packaging
 
 ### Product Details (7 tables)
 - [x] productBarcodes (~86 records)
 - [x] inventoryLines (~300 records)
-- [x] itemBoms (~76 records)
-- [x] productOperations (~39 records)
+- [x] itemBoms (~76 records) - formulation recipes
+- [x] productOperations (~39 records) - manufacturing steps
 - [x] productPrices (300 records)
 - [x] reorderSettings (100 records)
 - [x] vendorItems (100 records)
@@ -82,7 +106,7 @@ db.insert(schema.customers).values(data.customers).run()
 - [x] purchaseOrderLines (~89 records)
 - [x] salesOrders (60 records)
 - [x] salesOrderLines (~168 records)
-- [x] manufacturingOrders (~11 records)
+- [x] manufacturingOrders (~11 records) - batch production
 
 ### Stock Operations (7 tables)
 - [x] stockTransfers (~5 records)
@@ -132,6 +156,6 @@ src/
 
 | Command | Description |
 |---------|-------------|
-| `npm run generate` | Build mock.db with all 37 tables populated |
+| `npm run generate` | Build mock.db with all 38 tables populated |
 | `npm run typecheck` | Type check without emitting |
 | `npm run build` | Compile to dist/ |

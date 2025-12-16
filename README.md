@@ -1,6 +1,6 @@
 # inflow-mock
 
-Generate comprehensive mock databases for the inflow-get schema. 100% table coverage (38 tables) with realistic manufacturing inventory data.
+Generate comprehensive mock databases for cosmetics manufacturing using the inflow-get schema. 100% table coverage (38 tables) with realistic beauty product inventory data including skincare, makeup, hair care, and fragrances.
 
 ## Install
 
@@ -74,22 +74,32 @@ Output: `data/mock.db`
 
 ## Sample Generated Data
 
-**Vendors:**
-- Precision Fasteners Inc
-- Allied Steel Supply
-- Global Electronics Distributors
+**Vendors (Ingredient & Packaging Suppliers):**
+- Pure Botanicals Supply
+- Global Fragrance House
+- ColorTech Pigments
+- Cosmetic Glass & Bottles
+
+**Customers (Beauty Retailers & Spas):**
+- Radiant Beauty Co
+- Luxe Beauty Supply
+- Velvet Touch Spas
+- Elite Beauty Stores
 
 **Products:**
-- `HB-2464` - Hex Bolt M10
-- `MC-5711` - Motor Controller Large
-- `HC-2392` - Hydraulic Cylinder 3/4"
+- `LP-2464` - Lipstick Rose
+- `MO-5711` - Moisturizer 50ml
+- `PF-2392` - Perfume Matte
+- `SB-1847` - Shea Butter (raw ingredient)
+- `JR-3291` - Glass Jar (packaging)
 
 **Features:**
-- BOMs for manufacturable products
-- Operations with time/cost estimates
-- Multi-location inventory
+- BOMs for manufacturable cosmetics (formulation recipes)
+- Operations: Blending, Mixing, Filling, Labeling, QC Testing
+- Multi-location inventory (Climate Controlled, Production Lab, QC)
 - Stock transfers, adjustments, counts
 - Purchase & sales order history
+- Batch tracking custom fields
 
 ## API
 
