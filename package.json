@@ -56,6 +56,6 @@
   "dependencies": {
     "better-sqlite3": "^11.0.0",
     "drizzle-orm": "^0.45.1",
-    "inflow-get": "^0.3.3"
+    "inflow-get": "^0.3.4"
   }
 }
