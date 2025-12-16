@@ -1,7 +1,7 @@
 /**
  * Baseline data generator for inflow-get schema.
  * Creates clean, realistic manufacturing inventory data.
- * Goal: 100% table coverage (37 tables)
+ * Goal: 100% table coverage (38 tables)
  */
 
 import * as schema from '../db/schema.js'

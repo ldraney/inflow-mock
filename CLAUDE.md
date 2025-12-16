@@ -4,10 +4,10 @@ Generate comprehensive mock data for the inflow-get schema. Proves deep expertis
 
 ## Current Status
 
-**Table Coverage: 37/37 (100%)**
+**Table Coverage: 38/38 (100%)**
 
 - [x] Project structure (TypeScript, Drizzle, better-sqlite3)
-- [x] Database schema (uses inflow-get schema, 37 tables)
+- [x] Database schema (uses inflow-get schema, 38 tables)
 - [x] Complete baseline generator (all tables populated)
 - [x] Works as npm library (importable by other projects)
 

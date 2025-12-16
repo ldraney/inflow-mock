@@ -1,6 +1,6 @@
 # inflow-mock
 
-Generate comprehensive mock databases for the inflow-get schema. 100% table coverage (37 tables) with realistic manufacturing inventory data.
+Generate comprehensive mock databases for the inflow-get schema. 100% table coverage (38 tables) with realistic manufacturing inventory data.
 
 ## Install
 
@@ -54,7 +54,7 @@ Output: `data/mock.db`
 | medium | 500      | 50      | 75        | 4         |
 | large  | 1000     | 100     | 150       | 5         |
 
-## Table Coverage (37/37)
+## Table Coverage (38/38)
 
 **Reference Data:** categories, locations, currencies, paymentTerms, pricingSchemes, taxingSchemes, taxCodes, adjustmentReasons, operationTypes
 
@@ -95,7 +95,7 @@ Output: `data/mock.db`
 
 ### generate(options?)
 
-Returns `BaselineData` containing arrays for all 37 tables.
+Returns `BaselineData` containing arrays for all 38 tables.
 
 ```typescript
 interface GenerateOptions {

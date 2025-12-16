@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 /**
  * Generate the comprehensive mock database.
- * Goal: 100% table coverage (37 tables)
+ * Goal: 100% table coverage (38 tables)
  *
  * Usage:
  *   npm run db:push && npm run generate
@@ -177,7 +177,7 @@ async function main() {
   // Summary
   // ============================================================================
   console.log(`\nDatabase generated: ${DB_PATH}`)
-  console.log('\n=== Table Coverage: 37/37 (100%) ===\n')
+  console.log('\n=== Table Coverage: 38/38 (100%) ===\n')
   console.log('Reference Data:')
   console.log(`  - categories: ${data.categories.length}`)
   console.log(`  - locations: ${data.locations.length}`)
