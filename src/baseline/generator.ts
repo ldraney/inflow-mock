@@ -1,29 +1,53 @@
 /**
- * Baseline data generator.
+ * Baseline data generator for inflow-get schema.
  * Creates clean, realistic manufacturing inventory data.
  */
 
-import type { Vendor, Category, Product } from '../db/schema.js'
-import {
-  vendorTemplates,
-  categoryTemplates,
-  productTemplates,
-  dimensions,
-  emailDomains,
-  areaCodes,
-} from './data.js'
+import * as schema from '../db/schema.js'
+
+// Infer insert types from schema
+type Category = typeof schema.categories.$inferInsert
+type Location = typeof schema.locations.$inferInsert
+type Currency = typeof schema.currencies.$inferInsert
+type PaymentTerms = typeof schema.paymentTerms.$inferInsert
+type PricingScheme = typeof schema.pricingSchemes.$inferInsert
+type Vendor = typeof schema.vendors.$inferInsert
+type Customer = typeof schema.customers.$inferInsert
+type Product = typeof schema.products.$inferInsert
+type InventoryLine = typeof schema.inventoryLines.$inferInsert
+type ProductPrice = typeof schema.productPrices.$inferInsert
+type ReorderSetting = typeof schema.reorderSettings.$inferInsert
+type VendorItem = typeof schema.vendorItems.$inferInsert
+type PurchaseOrder = typeof schema.purchaseOrders.$inferInsert
+type PurchaseOrderLine = typeof schema.purchaseOrderLines.$inferInsert
+type SalesOrder = typeof schema.salesOrders.$inferInsert
+type SalesOrderLine = typeof schema.salesOrderLines.$inferInsert
 
 export interface GenerateOptions {
   products?: number
   vendors?: number
-  categories?: number
+  customers?: number
+  locations?: number
   seed?: number
 }
 
 export interface BaselineData {
-  vendors: Vendor[]
   categories: Category[]
+  locations: Location[]
+  currencies: Currency[]
+  paymentTerms: PaymentTerms[]
+  pricingSchemes: PricingScheme[]
+  vendors: Vendor[]
+  customers: Customer[]
   products: Product[]
+  inventoryLines: InventoryLine[]
+  productPrices: ProductPrice[]
+  reorderSettings: ReorderSetting[]
+  vendorItems: VendorItem[]
+  purchaseOrders: PurchaseOrder[]
+  purchaseOrderLines: PurchaseOrderLine[]
+  salesOrders: SalesOrder[]
+  salesOrderLines: SalesOrderLine[]
 }
 
 // Simple seeded random for reproducibility
@@ -43,6 +67,11 @@ class SeededRandom {
     return arr[Math.floor(this.next() * arr.length)]
   }
 
+  pickMultiple<T>(arr: T[], count: number): T[] {
+    const shuffled = this.shuffle([...arr])
+    return shuffled.slice(0, Math.min(count, arr.length))
+  }
+
   range(min: number, max: number): number {
     return Math.floor(this.next() * (max - min + 1)) + min
   }
@@ -59,152 +88,370 @@ class SeededRandom {
     }
     return result
   }
-}
 
-function generateVendor(template: typeof vendorTemplates[0], index: number, rng: SeededRandom): Vendor {
-  const firstName = rng.pick(['John', 'Sarah', 'Mike', 'Lisa', 'Tom', 'Karen', 'Dave', 'Amy'])
-  const lastName = rng.pick(['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Miller', 'Davis', 'Wilson'])
-  const domain = template.name.toLowerCase().replace(/[^a-z]/g, '').slice(0, 12)
-  const areaCode = rng.pick(areaCodes)
+  uuid(): string {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = Math.floor(this.next() * 16)
+      const v = c === 'x' ? r : (r & 0x3) | 0x8
+      return v.toString(16)
+    })
+  }
 
-  return {
-    name: template.name,
-    contactName: `${firstName} ${lastName}`,
-    email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${domain}.com`,
-    phone: `(${areaCode}) ${rng.range(200, 999)}-${rng.range(1000, 9999)}`,
-    address: `${rng.range(100, 9999)} ${rng.pick(['Industrial', 'Commerce', 'Factory', 'Manufacturing', 'Enterprise'])} ${rng.pick(['Blvd', 'Dr', 'Ave', 'Pkwy', 'Way'])}`,
-    createdAt: new Date(Date.now() - rng.range(0, 365 * 2) * 24 * 60 * 60 * 1000).toISOString(),
+  date(daysAgo: number = 365): string {
+    const d = new Date(Date.now() - this.range(0, daysAgo) * 24 * 60 * 60 * 1000)
+    return d.toISOString().split('T')[0]
+  }
+
+  timestamp(): string {
+    return new Date().toISOString()
   }
 }
 
-function generateCategory(template: typeof categoryTemplates[0], index: number, rng: SeededRandom): Category {
-  return {
-    name: template.name,
-    description: template.description,
-    parentId: null,
-    createdAt: new Date(Date.now() - rng.range(0, 365 * 2) * 24 * 60 * 60 * 1000).toISOString(),
-  }
-}
+// Template data
+const categoryNames = [
+  'Fasteners', 'Raw Materials', 'Bearings', 'Electronics', 'Hydraulics',
+  'Seals & Gaskets', 'Safety Equipment', 'Tooling', 'Electrical', 'Lubricants',
+  'Abrasives', 'Packaging', 'Pneumatics', 'Motors', 'Pumps',
+]
 
-function expandNamePattern(pattern: string, rng: SeededRandom): string {
-  return pattern
-    .replace('{size}', rng.pick(dimensions.boltSizes))
-    .replace('{length}', rng.pick(dimensions.lengths))
-    .replace('{thickness}', rng.pick(dimensions.thicknesses))
-    .replace('{diameter}', rng.pick(dimensions.diameters))
-    .replace('{width}', rng.pick(['4"', '6"', '8"', '12"', '24"', '36"', '48"']))
-    .replace('{height}', rng.pick(['4"', '6"', '8"', '12"']))
-    .replace('{l}', rng.pick(['12"', '18"', '24"', '36"']))
-    .replace('{w}', rng.pick(['12"', '18"', '24"']))
-    .replace('{h}', rng.pick(['6"', '12"', '18"', '24"']))
-    .replace('{grit}', rng.pick(dimensions.grits))
-    .replace('{color}', rng.pick(dimensions.colors))
-    .replace('{material}', rng.pick(dimensions.materials))
-    .replace('{series}', rng.pick(['6200', '6300', '6000', '6800']))
-    .replace('{type}', rng.pick(['Standard', 'Heavy Duty', 'Premium', 'Economy']))
-    .replace('{id}', `${rng.range(10, 100)}mm`)
-    .replace('{od}', `${rng.range(20, 150)}mm`)
-    .replace('{cs}', `${rng.rangeFloat(1.5, 5).toFixed(1)}mm`)
-    .replace('{bore}', `${rng.pick(['2"', '3"', '4"', '5"', '6"'])}`)
-    .replace('{stroke}', `${rng.pick(['6"', '12"', '18"', '24"', '36"'])}`)
-    .replace('{gpm}', `${rng.range(5, 50)}`)
-    .replace('{ports}', `${rng.pick(['2', '3', '4'])}`)
-    .replace('{pos}', `${rng.pick(['2', '3'])}`)
-    .replace('{range}', `${rng.pick(['4mm', '8mm', '12mm', '20mm'])}`)
-    .replace('{model}', `${rng.pick(['DL-', 'QM-', 'XC-'])}${rng.range(100, 999)}`)
-    .replace('{amps}', `${rng.pick(['10', '20', '30', '50', '100'])}`)
-    .replace('{voltage}', `${rng.pick(['12', '24', '48', '120', '240'])}`)
-    .replace('{application}', rng.pick(['Pump', 'Cylinder', 'Valve', 'Motor']))
-    .replace('{nrr}', `${rng.range(22, 33)}`)
-    .replace('{flutes}', `${rng.pick(['2', '3', '4'])}`)
-    .replace('{gauge}', `${rng.pick(['10', '12', '14', '16', '18'])}`)
-    .replace('{pins}', `${rng.pick(['2', '4', '6', '8', '12'])}`)
-    .replace('{hp}', `${rng.pick(['1/4', '1/2', '1', '2', '3', '5', '10'])}`)
-    .replace('{rpm}', `${rng.pick(['1200', '1750', '3450'])}`)
-    .replace('{grade}', rng.pick(['ISO', 'SAE', 'DIN']))
-    .replace('{pitch}', rng.pick(['Fine', 'Coarse']))
-}
+const locationNames = [
+  { name: 'Main Warehouse', abbr: 'MAIN' },
+  { name: 'Secondary Storage', abbr: 'SEC' },
+  { name: 'Production Floor', abbr: 'PROD' },
+  { name: 'Receiving Dock', abbr: 'RECV' },
+  { name: 'Shipping Area', abbr: 'SHIP' },
+]
 
-function generateSku(prefix: string, index: number, rng: SeededRandom): string {
-  return `${prefix}-${rng.range(1000, 9999)}`
-}
+const vendorNames = [
+  'Precision Fasteners Inc', 'Allied Steel Supply', 'Midwest Industrial Components',
+  'Global Electronics Distributors', 'National Bearing Company', 'Thompson Plastics',
+  'Valley Machine Parts', 'Premier Rubber Products', 'Central Hydraulics',
+  'United Electrical Supply', 'American Tubing Corp', 'Quality Seal Systems',
+  'Industrial Adhesives Ltd', 'Metro Packaging Solutions', 'Coastal Abrasives',
+]
 
-function generateProduct(
-  categoryName: string,
-  categoryId: number,
-  vendorId: number,
-  index: number,
-  rng: SeededRandom
-): Product {
-  const templates = productTemplates[categoryName]
-  if (!templates || templates.length === 0) {
-    throw new Error(`No product templates for category: ${categoryName}`)
-  }
+const customerNames = [
+  'Acme Manufacturing', 'Summit Industries', 'Pinnacle Products', 'Atlas Fabrication',
+  'Frontier Engineering', 'Apex Machining', 'Prime Assembly', 'Titan Manufacturing',
+  'Sterling Products', 'Vanguard Industries', 'Eagle Precision', 'Liberty Manufacturing',
+  'Patriot Products', 'Champion Industries', 'Victory Manufacturing', 'Horizon Fabrication',
+  'Pioneer Products', 'Guardian Manufacturing', 'Sentinel Industries', 'Phoenix Assembly',
+]
 
-  const template = rng.pick(templates)
-  const name = expandNamePattern(template.namePattern, rng)
-  const sku = generateSku(template.skuPrefix, index, rng)
-  const reorderPoint = rng.range(...template.reorderRange)
+const productTemplates = [
+  { prefix: 'HB', name: 'Hex Bolt', category: 'Fasteners', uom: 'EA' },
+  { prefix: 'SC', name: 'Socket Cap Screw', category: 'Fasteners', uom: 'EA' },
+  { prefix: 'HN', name: 'Hex Nut', category: 'Fasteners', uom: 'EA' },
+  { prefix: 'SP', name: 'Steel Plate', category: 'Raw Materials', uom: 'EA' },
+  { prefix: 'AB', name: 'Aluminum Bar', category: 'Raw Materials', uom: 'EA' },
+  { prefix: 'BB', name: 'Ball Bearing', category: 'Bearings', uom: 'EA' },
+  { prefix: 'RB', name: 'Roller Bearing', category: 'Bearings', uom: 'EA' },
+  { prefix: 'PS', name: 'Proximity Sensor', category: 'Electronics', uom: 'EA' },
+  { prefix: 'MC', name: 'Motor Controller', category: 'Electronics', uom: 'EA' },
+  { prefix: 'HC', name: 'Hydraulic Cylinder', category: 'Hydraulics', uom: 'EA' },
+  { prefix: 'HH', name: 'Hydraulic Hose', category: 'Hydraulics', uom: 'EA' },
+  { prefix: 'OR', name: 'O-Ring', category: 'Seals & Gaskets', uom: 'EA' },
+  { prefix: 'GS', name: 'Gasket Set', category: 'Seals & Gaskets', uom: 'EA' },
+  { prefix: 'SG', name: 'Safety Glasses', category: 'Safety Equipment', uom: 'EA' },
+  { prefix: 'WG', name: 'Work Gloves', category: 'Safety Equipment', uom: 'PR' },
+  { prefix: 'EM', name: 'End Mill', category: 'Tooling', uom: 'EA' },
+  { prefix: 'DB', name: 'Drill Bit', category: 'Tooling', uom: 'EA' },
+  { prefix: 'WR', name: 'Wire Spool', category: 'Electrical', uom: 'RL' },
+  { prefix: 'MT', name: 'Motor', category: 'Motors', uom: 'EA' },
+  { prefix: 'GW', name: 'Grinding Wheel', category: 'Abrasives', uom: 'EA' },
+]
 
-  return {
-    name,
-    sku,
-    description: `${name} - ${categoryName}`,
-    categoryId,
-    vendorId,
-    unitPrice: Math.round(rng.rangeFloat(...template.priceRange) * 100) / 100,
-    unitOfMeasure: template.unitOfMeasure,
-    quantityOnHand: rng.range(0, reorderPoint * 3),
-    reorderPoint,
-    reorderQuantity: Math.round(reorderPoint * rng.rangeFloat(1.5, 3)),
-    leadTimeDays: rng.range(3, 21),
-    isActive: true,
-    createdAt: new Date(Date.now() - rng.range(0, 365 * 2) * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: null,
-  }
-}
+const sizes = ['Small', 'Medium', 'Large', 'XL', '1/4"', '3/8"', '1/2"', '3/4"', '1"', 'M6', 'M8', 'M10', 'M12']
 
 export function generate(options: GenerateOptions = {}): BaselineData {
   const {
     products: productCount = 100,
     vendors: vendorCount = 15,
-    categories: categoryCount = 12,
+    customers: customerCount = 20,
+    locations: locationCount = 3,
     seed = Date.now(),
   } = options
 
   const rng = new SeededRandom(seed)
 
+  // Generate reference data
+  const currencies: Currency[] = [{
+    currencyId: rng.uuid(),
+    name: 'US Dollar',
+    code: 'USD',
+    symbol: '$',
+    exchangeRate: '1.00',
+    isBaseCurrency: true,
+    timestamp: rng.timestamp(),
+  }]
+
+  const paymentTerms: PaymentTerms[] = [
+    { paymentTermsId: rng.uuid(), name: 'Net 30', netDays: 30, timestamp: rng.timestamp() },
+    { paymentTermsId: rng.uuid(), name: 'Net 60', netDays: 60, timestamp: rng.timestamp() },
+    { paymentTermsId: rng.uuid(), name: 'Due on Receipt', netDays: 0, timestamp: rng.timestamp() },
+  ]
+
+  const pricingSchemes: PricingScheme[] = [
+    { pricingSchemeId: rng.uuid(), name: 'Standard', isDefault: true, timestamp: rng.timestamp() },
+    { pricingSchemeId: rng.uuid(), name: 'Wholesale', isDefault: false, timestamp: rng.timestamp() },
+  ]
+
+  const categories: Category[] = categoryNames.slice(0, Math.min(12, categoryNames.length)).map(name => ({
+    categoryId: rng.uuid(),
+    name,
+    isActive: true,
+    timestamp: rng.timestamp(),
+  }))
+
+  const locations: Location[] = locationNames.slice(0, locationCount).map(loc => ({
+    locationId: rng.uuid(),
+    name: loc.name,
+    abbreviation: loc.abbr,
+    isActive: true,
+    isShippable: loc.abbr === 'SHIP',
+    isReceivable: loc.abbr === 'RECV' || loc.abbr === 'MAIN',
+    timestamp: rng.timestamp(),
+  }))
+
   // Generate vendors
-  const vendorPool = rng.shuffle([...vendorTemplates])
-  const vendors: Vendor[] = vendorPool
-    .slice(0, Math.min(vendorCount, vendorTemplates.length))
-    .map((template, i) => generateVendor(template, i, rng))
+  const vendors: Vendor[] = rng.shuffle([...vendorNames]).slice(0, vendorCount).map(name => ({
+    vendorId: rng.uuid(),
+    name,
+    vendorCode: name.split(' ').map(w => w[0]).join('').toUpperCase(),
+    isActive: true,
+    currencyId: currencies[0].currencyId,
+    paymentTermsId: rng.pick(paymentTerms).paymentTermsId,
+    timestamp: rng.timestamp(),
+  }))
 
-  // Generate categories
-  const categoryPool = rng.shuffle([...categoryTemplates])
-  const categories: Category[] = categoryPool
-    .slice(0, Math.min(categoryCount, categoryTemplates.length))
-    .map((template, i) => generateCategory(template, i, rng))
+  // Generate customers
+  const customers: Customer[] = rng.shuffle([...customerNames]).slice(0, customerCount).map(name => ({
+    customerId: rng.uuid(),
+    name,
+    customerCode: name.split(' ').map(w => w[0]).join('').toUpperCase(),
+    isActive: true,
+    currencyId: currencies[0].currencyId,
+    pricingSchemeId: rng.pick(pricingSchemes).pricingSchemeId,
+    paymentTermsId: rng.pick(paymentTerms).paymentTermsId,
+    timestamp: rng.timestamp(),
+  }))
 
-  // Generate products distributed across categories and vendors
+  // Generate products
   const products: Product[] = []
-  for (let i = 0; i < productCount; i++) {
-    const categoryIndex = i % categories.length
-    const category = categories[categoryIndex]
-    const vendorIndex = i % vendors.length
+  const inventoryLines: InventoryLine[] = []
+  const productPrices: ProductPrice[] = []
+  const reorderSettings: ReorderSetting[] = []
+  const vendorItems: VendorItem[] = []
 
-    // Assign to a vendor that somewhat matches the category specialty
-    const product = generateProduct(
-      category.name,
-      categoryIndex + 1, // 1-indexed IDs
-      vendorIndex + 1,   // 1-indexed IDs
-      i,
-      rng
-    )
-    products.push(product)
+  for (let i = 0; i < productCount; i++) {
+    const template = rng.pick(productTemplates)
+    const size = rng.pick(sizes)
+    const category = categories.find(c => c.name === template.category) || rng.pick(categories)
+    const vendor = rng.pick(vendors)
+
+    const productId = rng.uuid()
+    const sku = `${template.prefix}-${rng.range(1000, 9999)}`
+    const unitPrice = rng.rangeFloat(5, 500).toFixed(2)
+    const cost = (parseFloat(unitPrice) * rng.rangeFloat(0.4, 0.7)).toFixed(2)
+
+    products.push({
+      productId,
+      name: `${template.name} ${size}`,
+      description: `${template.name} - ${size} size`,
+      sku,
+      itemType: 'Stock',
+      isActive: true,
+      categoryId: category.categoryId,
+      standardUomName: template.uom,
+      timestamp: rng.timestamp(),
+    })
+
+    // Add inventory at each location
+    for (const location of locations) {
+      const qty = rng.range(0, 200)
+      if (qty > 0) {
+        inventoryLines.push({
+          inventoryLineId: rng.uuid(),
+          productId,
+          locationId: location.locationId,
+          quantityOnHand: qty.toString(),
+          timestamp: rng.timestamp(),
+        })
+      }
+    }
+
+    // Add pricing
+    productPrices.push({
+      productPriceId: rng.uuid(),
+      productId,
+      pricingSchemeId: pricingSchemes[0].pricingSchemeId,
+      priceType: 'Fixed',
+      unitPrice,
+      timestamp: rng.timestamp(),
+    })
+
+    // Add reorder settings for main location
+    const mainLocation = locations[0]
+    reorderSettings.push({
+      reorderSettingsId: rng.uuid(),
+      productId,
+      locationId: mainLocation.locationId,
+      vendorId: vendor.vendorId,
+      enableReordering: true,
+      reorderMethod: 'ReorderPoint',
+      reorderPoint: rng.range(10, 50).toString(),
+      reorderQuantity: rng.range(50, 200).toString(),
+      timestamp: rng.timestamp(),
+    })
+
+    // Add vendor item
+    vendorItems.push({
+      vendorItemId: rng.uuid(),
+      vendorId: vendor.vendorId,
+      productId,
+      vendorItemCode: sku,
+      cost,
+      leadTimeDays: rng.range(3, 21),
+      lineNum: 1,
+      timestamp: rng.timestamp(),
+    })
   }
 
-  return { vendors, categories, products }
+  // Generate purchase orders
+  const purchaseOrders: PurchaseOrder[] = []
+  const purchaseOrderLines: PurchaseOrderLine[] = []
+  const poCount = Math.floor(vendorCount * 2)
+
+  for (let i = 0; i < poCount; i++) {
+    const vendor = rng.pick(vendors)
+    const location = rng.pick(locations)
+    const poId = rng.uuid()
+    const status = rng.pick(['Open', 'Open', 'Open', 'Received', 'Received', 'PartiallyReceived'])
+    const orderDate = rng.date(90)
+
+    purchaseOrders.push({
+      purchaseOrderId: poId,
+      orderNumber: `PO-${1000 + i}`,
+      vendorId: vendor.vendorId,
+      status,
+      orderDate,
+      expectedDate: rng.date(30),
+      locationId: location.locationId,
+      currencyId: currencies[0].currencyId,
+      exchangeRate: '1.00',
+      timestamp: rng.timestamp(),
+    })
+
+    // Add 1-5 lines per PO
+    const lineCount = rng.range(1, 5)
+    const poProducts = rng.pickMultiple(products, lineCount)
+    let subtotal = 0
+
+    for (let j = 0; j < poProducts.length; j++) {
+      const product = poProducts[j]
+      const vendorItem = vendorItems.find(vi => vi.productId === product.productId)
+      const qty = rng.range(10, 100)
+      const unitCost = vendorItem?.cost || rng.rangeFloat(5, 100).toFixed(2)
+      const lineTotal = qty * parseFloat(unitCost)
+      subtotal += lineTotal
+
+      purchaseOrderLines.push({
+        purchaseOrderLineId: rng.uuid(),
+        purchaseOrderId: poId,
+        productId: product.productId,
+        lineNum: j + 1,
+        description: product.name,
+        quantity: qty.toString(),
+        unitCost,
+        lineTotal: lineTotal.toFixed(2),
+        quantityReceived: status === 'Received' ? qty.toString() : '0',
+        timestamp: rng.timestamp(),
+      })
+    }
+
+    // Update PO totals
+    const po = purchaseOrders.find(p => p.purchaseOrderId === poId)!
+    po.subtotal = subtotal.toFixed(2)
+    po.total = subtotal.toFixed(2)
+  }
+
+  // Generate sales orders
+  const salesOrders: SalesOrder[] = []
+  const salesOrderLines: SalesOrderLine[] = []
+  const soCount = Math.floor(customerCount * 3)
+
+  for (let i = 0; i < soCount; i++) {
+    const customer = rng.pick(customers)
+    const location = rng.pick(locations)
+    const soId = rng.uuid()
+    const status = rng.pick(['Open', 'Open', 'Shipped', 'Shipped', 'Shipped', 'PartiallyShipped'])
+    const orderDate = rng.date(90)
+
+    salesOrders.push({
+      salesOrderId: soId,
+      orderNumber: `SO-${2000 + i}`,
+      customerId: customer.customerId,
+      status,
+      orderDate,
+      expectedShipDate: rng.date(14),
+      locationId: location.locationId,
+      currencyId: currencies[0].currencyId,
+      exchangeRate: '1.00',
+      timestamp: rng.timestamp(),
+    })
+
+    // Add 1-5 lines per SO
+    const lineCount = rng.range(1, 5)
+    const soProducts = rng.pickMultiple(products, lineCount)
+    let subtotal = 0
+
+    for (let j = 0; j < soProducts.length; j++) {
+      const product = soProducts[j]
+      const price = productPrices.find(pp => pp.productId === product.productId)
+      const qty = rng.range(1, 50)
+      const unitPrice = price?.unitPrice || rng.rangeFloat(10, 200).toFixed(2)
+      const lineTotal = qty * parseFloat(unitPrice)
+      subtotal += lineTotal
+
+      salesOrderLines.push({
+        salesOrderLineId: rng.uuid(),
+        salesOrderId: soId,
+        productId: product.productId,
+        lineNum: j + 1,
+        description: product.name,
+        quantity: qty.toString(),
+        unitPrice,
+        lineTotal: lineTotal.toFixed(2),
+        quantityPicked: status === 'Shipped' ? qty.toString() : '0',
+        quantityShipped: status === 'Shipped' ? qty.toString() : '0',
+        timestamp: rng.timestamp(),
+      })
+    }
+
+    // Update SO totals
+    const so = salesOrders.find(s => s.salesOrderId === soId)!
+    so.subtotal = subtotal.toFixed(2)
+    so.total = subtotal.toFixed(2)
+  }
+
+  return {
+    categories,
+    locations,
+    currencies,
+    paymentTerms,
+    pricingSchemes,
+    vendors,
+    customers,
+    products,
+    inventoryLines,
+    productPrices,
+    reorderSettings,
+    vendorItems,
+    purchaseOrders,
+    purchaseOrderLines,
+    salesOrders,
+    salesOrderLines,
+  }
 }
 
 export default { generate }

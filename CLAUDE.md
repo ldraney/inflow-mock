@@ -5,7 +5,7 @@ Two outputs: a messy database and a library to fix it.
 ## Current Status
 
 - [x] Project structure (TypeScript, Drizzle, better-sqlite3)
-- [x] Database schema (local, TODO: swap for inflow-get)
+- [x] Database schema (uses inflow-get schema, 30+ tables)
 - [x] Baseline generator (clean manufacturing data)
 - [ ] Patterns (create/detect/fix modules)
 - [ ] Scoring system
@@ -35,8 +35,8 @@ Detect and fix code for each pattern. Consumers import this to identify and reso
 ```typescript
 import { baseline, patterns, createDb, schema } from 'inflow-mock'
 
-// Generate clean data
-const clean = baseline.generate({ products: 100, vendors: 15 })
+// Generate clean data (100 products, 20 customers, 15 vendors, 60 sales orders)
+const clean = baseline.generate({ products: 100, customers: 20, vendors: 15 })
 
 // Or detect/fix issues in existing data
 const dupes = patterns.duplicates.detect(db)
@@ -50,11 +50,10 @@ src/
 ├── index.ts              # Main entry point
 ├── generate.ts           # CLI script to build combined.db
 ├── db/
-│   ├── schema.ts         # Drizzle schema (TODO: swap for inflow-get)
+│   ├── schema.ts         # Re-exports inflow-get schema
 │   └── index.ts          # DB connection + table creation
 ├── baseline/
-│   ├── data.ts           # Manufacturing templates
-│   ├── generator.ts      # Seeded random generator
+│   ├── generator.ts      # Seeded random data generator
 │   └── index.ts
 └── patterns/
     ├── index.ts          # Pattern exports
@@ -91,6 +90,11 @@ Data is "clean" when:
 ### Categories
 - No duplicates
 - At least one product references it
+
+### Customers
+- Unique name (no duplicates)
+- Valid contact info (email, phone)
+- At least one sales order references it
 
 ### Relationships
 - All foreign keys resolve (no orphaned references)

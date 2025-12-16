@@ -3,17 +3,17 @@
  * Generate the combined messy database.
  *
  * Usage:
- *   npm run generate
+ *   npm run db:push && npm run generate
  *   npm run generate -- --products=200 --seed=12345
  */
 
 import { existsSync, mkdirSync, unlinkSync } from 'fs'
 import { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
+import { execSync } from 'child_process'
 
-import { createDb, createTables, schema } from './db/index.js'
+import { createDb, schema } from './db/index.js'
 import { generate } from './baseline/index.js'
-// import { patterns } from './patterns/index.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const DATA_DIR = resolve(__dirname, '../data')
@@ -22,7 +22,8 @@ const DB_PATH = resolve(DATA_DIR, 'combined.db')
 interface GenerateConfig {
   products: number
   vendors: number
-  categories: number
+  customers: number
+  locations: number
   seed: number
 }
 
@@ -35,7 +36,8 @@ function parseArgs(): Partial<GenerateConfig> {
       const [, key, value] = match
       if (key === 'products') config.products = parseInt(value)
       if (key === 'vendors') config.vendors = parseInt(value)
-      if (key === 'categories') config.categories = parseInt(value)
+      if (key === 'customers') config.customers = parseInt(value)
+      if (key === 'locations') config.locations = parseInt(value)
       if (key === 'seed') config.seed = parseInt(value)
     }
   }
@@ -48,8 +50,9 @@ async function main() {
   const config: GenerateConfig = {
     products: args.products ?? 100,
     vendors: args.vendors ?? 15,
-    categories: args.categories ?? 12,
-    seed: args.seed ?? 42, // Fixed seed for reproducibility by default
+    customers: args.customers ?? 20,
+    locations: args.locations ?? 3,
+    seed: args.seed ?? 42,
   }
 
   console.log('Configuration:', config)
@@ -65,57 +68,66 @@ async function main() {
     console.log('Removed existing database')
   }
 
-  // Create fresh database
-  const db = createDb(DB_PATH)
-  createTables(db)
-  console.log('Created database schema')
+  // Create tables using drizzle-kit push
+  console.log('Creating database schema...')
+  execSync('npm run db:push', { stdio: 'inherit', cwd: resolve(__dirname, '..') })
 
-  // Generate clean baseline data
+  // Create database connection
+  const db = createDb(DB_PATH)
+  console.log('Database connected')
+
+  // Generate baseline data
   console.log('Generating baseline data...')
-  const baseline = generate({
+  const data = generate({
     products: config.products,
     vendors: config.vendors,
-    categories: config.categories,
+    customers: config.customers,
+    locations: config.locations,
     seed: config.seed,
   })
 
-  // Insert vendors
-  console.log(`Inserting ${baseline.vendors.length} vendors...`)
-  for (const vendor of baseline.vendors) {
-    await db.insert(schema.vendors).values(vendor)
-  }
+  // Insert reference data first
+  console.log('Inserting reference data...')
+  if (data.categories.length) await db.insert(schema.categories).values(data.categories)
+  if (data.locations.length) await db.insert(schema.locations).values(data.locations)
+  if (data.currencies.length) await db.insert(schema.currencies).values(data.currencies)
+  if (data.paymentTerms.length) await db.insert(schema.paymentTerms).values(data.paymentTerms)
+  if (data.pricingSchemes.length) await db.insert(schema.pricingSchemes).values(data.pricingSchemes)
 
-  // Insert categories
-  console.log(`Inserting ${baseline.categories.length} categories...`)
-  for (const category of baseline.categories) {
-    await db.insert(schema.categories).values(category)
-  }
+  // Insert entities
+  console.log('Inserting vendors...')
+  if (data.vendors.length) await db.insert(schema.vendors).values(data.vendors)
 
-  // Insert products
-  console.log(`Inserting ${baseline.products.length} products...`)
-  for (const product of baseline.products) {
-    await db.insert(schema.products).values(product)
-  }
+  console.log('Inserting customers...')
+  if (data.customers.length) await db.insert(schema.customers).values(data.customers)
 
-  console.log('Baseline data inserted')
+  console.log('Inserting products...')
+  if (data.products.length) await db.insert(schema.products).values(data.products)
 
-  // Apply patterns to create mess
-  // TODO: Uncomment as patterns are implemented
-  // console.log('Applying patterns...')
-  // await patterns.duplicates.create(db, { severity: 0.2 })
-  // await patterns.skuChaos.create(db, { severity: 0.3 })
-  // await patterns.vendorSprawl.create(db, { severity: 0.15 })
-  // await patterns.missingReorder.create(db, { severity: 0.25 })
-  // await patterns.categoryMess.create(db, { severity: 0.2 })
-  // await patterns.orphanedRecords.create(db, { severity: 0.1 })
-  // await patterns.namingAnarchy.create(db, { severity: 0.3 })
+  // Insert product-related data
+  console.log('Inserting inventory and pricing...')
+  if (data.inventoryLines.length) await db.insert(schema.inventoryLines).values(data.inventoryLines)
+  if (data.productPrices.length) await db.insert(schema.productPrices).values(data.productPrices)
+  if (data.reorderSettings.length) await db.insert(schema.reorderSettings).values(data.reorderSettings)
+  if (data.vendorItems.length) await db.insert(schema.vendorItems).values(data.vendorItems)
+
+  // Insert orders
+  console.log('Inserting orders...')
+  if (data.purchaseOrders.length) await db.insert(schema.purchaseOrders).values(data.purchaseOrders)
+  if (data.purchaseOrderLines.length) await db.insert(schema.purchaseOrderLines).values(data.purchaseOrderLines)
+  if (data.salesOrders.length) await db.insert(schema.salesOrders).values(data.salesOrders)
+  if (data.salesOrderLines.length) await db.insert(schema.salesOrderLines).values(data.salesOrderLines)
 
   console.log(`\nDatabase generated: ${DB_PATH}`)
   console.log('Summary:')
-  console.log(`  - Vendors: ${baseline.vendors.length}`)
-  console.log(`  - Categories: ${baseline.categories.length}`)
-  console.log(`  - Products: ${baseline.products.length}`)
-  console.log('\nPatterns applied: (none yet - implement patterns to add mess)')
+  console.log(`  - Categories: ${data.categories.length}`)
+  console.log(`  - Locations: ${data.locations.length}`)
+  console.log(`  - Vendors: ${data.vendors.length}`)
+  console.log(`  - Customers: ${data.customers.length}`)
+  console.log(`  - Products: ${data.products.length}`)
+  console.log(`  - Inventory Lines: ${data.inventoryLines.length}`)
+  console.log(`  - Purchase Orders: ${data.purchaseOrders.length}`)
+  console.log(`  - Sales Orders: ${data.salesOrders.length}`)
 }
 
 main().catch(console.error)
