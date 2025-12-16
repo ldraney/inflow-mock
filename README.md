@@ -29,9 +29,9 @@ const data = generate({
 })
 
 // Write to database
-const db = createDb('./test.db')
-await db.insert(schema.products).values(data.products)
-await db.insert(schema.vendors).values(data.vendors)
+const db = createDb('./test.db')  // or ':memory:'
+db.insert(schema.products).values(data.products).run()
+db.insert(schema.vendors).values(data.vendors).run()
 // ... insert other tables
 ```
 
