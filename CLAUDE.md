@@ -4,12 +4,11 @@ Generate comprehensive mock data for the inflow-get schema. Proves deep expertis
 
 ## Current Status
 
-**Table Coverage: 16/37 (43%)**
+**Table Coverage: 37/37 (100%)**
 
 - [x] Project structure (TypeScript, Drizzle, better-sqlite3)
 - [x] Database schema (uses inflow-get schema, 37 tables)
-- [x] Core baseline generator (products, orders, inventory)
-- [ ] Complete table coverage (see roadmap below)
+- [x] Complete baseline generator (all tables populated)
 
 ## Quick Start
 
@@ -29,8 +28,6 @@ data/
   mock.db    # generated, gitignored
 ```
 
-Goal: 100% table coverage with realistic, interconnected manufacturing data.
-
 ```typescript
 import { generate, createDb, schema } from 'inflow-mock'
 
@@ -39,61 +36,61 @@ const data = generate({ products: 100, customers: 20, vendors: 15 })
 // Returns: 100 products, 20 customers, 15 vendors, 60 sales orders, etc.
 ```
 
-## Table Coverage Roadmap
+## Table Coverage
 
-### Populated (16 tables)
-- [x] categories
-- [x] currencies
-- [x] customers
-- [x] inventoryLines
-- [x] locations
-- [x] paymentTerms
-- [x] pricingSchemes
-- [x] productPrices
-- [x] products
-- [x] purchaseOrderLines
-- [x] purchaseOrders
-- [x] reorderSettings
-- [x] salesOrderLines
-- [x] salesOrders
-- [x] vendorItems
-- [x] vendors
+### Reference Data (9 tables)
+- [x] categories (12 records)
+- [x] locations (3 records)
+- [x] currencies (1 record)
+- [x] paymentTerms (4 records)
+- [x] pricingSchemes (3 records)
+- [x] taxingSchemes (2 records)
+- [x] taxCodes (3 records)
+- [x] adjustmentReasons (8 records)
+- [x] operationTypes (8 records)
 
-### TODO: Reference Data (4 tables)
-- [ ] adjustmentReasons - reasons for stock adjustments
-- [ ] operationTypes - manufacturing operation types
-- [ ] taxCodes - tax codes
-- [ ] taxingSchemes - tax schemes
+### Team & Custom Fields (4 tables)
+- [x] teamMembers (5 records)
+- [x] customFieldDefinitions (4 records)
+- [x] customFieldDropdownOptions (1 record)
+- [x] customFields (1 record)
 
-### TODO: Team & Custom Fields (4 tables)
-- [ ] teamMembers - users/team members
-- [ ] customFieldDefinitions - custom field metadata
-- [ ] customFieldDropdownOptions - dropdown choices
-- [ ] customFields - custom field values
+### Core Entities (3 tables)
+- [x] vendors (15 records)
+- [x] customers (20 records)
+- [x] products (100 records)
 
-### TODO: Product Details (3 tables)
-- [ ] productBarcodes - barcode data
-- [ ] itemBoms - bill of materials
-- [ ] productOperations - manufacturing operations
+### Product Details (7 tables)
+- [x] productBarcodes (~86 records)
+- [x] inventoryLines (~300 records)
+- [x] itemBoms (~76 records)
+- [x] productOperations (~39 records)
+- [x] productPrices (300 records)
+- [x] reorderSettings (100 records)
+- [x] vendorItems (100 records)
 
-### TODO: Stock Operations (7 tables)
-- [ ] stockAdjustments - inventory adjustments
-- [ ] stockAdjustmentLines - adjustment line items
-- [ ] stockTransfers - inter-location transfers
-- [ ] stockTransferLines - transfer line items
-- [ ] countSheets - stock count headers
-- [ ] countSheetLines - stock count details
-- [ ] stockCounts - count records
+### Orders (5 tables)
+- [x] purchaseOrders (30 records)
+- [x] purchaseOrderLines (~89 records)
+- [x] salesOrders (60 records)
+- [x] salesOrderLines (~168 records)
+- [x] manufacturingOrders (~11 records)
 
-### TODO: Cost Adjustments (2 tables)
-- [ ] productCostAdjustments - cost adjustment headers
-- [ ] productCostAdjustmentLines - cost adjustment details
+### Stock Operations (7 tables)
+- [x] stockTransfers (~5 records)
+- [x] stockTransferLines (~13 records)
+- [x] stockAdjustments (~6 records)
+- [x] stockAdjustmentLines (~8 records)
+- [x] stockCounts (~4 records)
+- [x] countSheets (~9 records)
+- [x] countSheetLines (~55 records)
 
-### TODO: Manufacturing (1 table)
-- [ ] manufacturingOrders - work orders
+### Cost Adjustments (2 tables)
+- [x] productCostAdjustments (~4 records)
+- [x] productCostAdjustmentLines (~15 records)
 
-### Computed/View (1 table)
-- [ ] productSummary - aggregated product data (may be view-only)
+### Computed (1 table)
+- [x] productSummary (100 records)
 
 ## Project Structure
 
@@ -127,6 +124,6 @@ src/
 
 | Command | Description |
 |---------|-------------|
-| `npm run generate` | Build mock.db with all tables populated |
+| `npm run generate` | Build mock.db with all 37 tables populated |
 | `npm run typecheck` | Type check without emitting |
 | `npm run build` | Compile to dist/ |

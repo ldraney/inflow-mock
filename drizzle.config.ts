@@ -6,6 +6,6 @@ export default defineConfig({
   schema: './node_modules/inflow-get/dist/db/schema.js',
   out: './drizzle',
   dbCredentials: {
-    url: './data/combined.db',
+    url: './data/mock.db',
   },
 })
