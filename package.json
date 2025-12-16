@@ -1,7 +1,7 @@
 {
   "name": "inflow-mock",
-  "version": "1.0.0",
-  "description": "Generate messy databases and provide detection/fix libraries for data quality patterns",
+  "version": "1.1.0",
+  "description": "Generate comprehensive mock databases for the inflow-get schema",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,23 +9,43 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./schema": {
+      "types": "./dist/db/schema.d.ts",
+      "import": "./dist/db/schema.js"
     }
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc",
+    "prepublishOnly": "npm run build",
     "generate": "tsx src/generate.ts",
     "dev": "tsx watch src/generate.ts",
     "typecheck": "tsc --noEmit",
     "db:push": "drizzle-kit push"
   },
   "keywords": [
-    "data-quality",
     "mock-data",
     "sqlite",
-    "drizzle"
+    "drizzle",
+    "testing",
+    "fixtures",
+    "manufacturing",
+    "inventory"
   ],
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ldraney/inflow-mock.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ldraney/inflow-mock/issues"
+  },
+  "homepage": "https://github.com/ldraney/inflow-mock#readme",
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.8",
     "@types/node": "^20.10.0",

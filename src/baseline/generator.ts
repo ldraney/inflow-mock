@@ -46,12 +46,27 @@ type CountSheet = typeof schema.countSheets.$inferInsert
 type CountSheetLine = typeof schema.countSheetLines.$inferInsert
 type ProductSummary = typeof schema.productSummary.$inferInsert
 
+export type Preset = 'small' | 'medium' | 'large'
+
 export interface GenerateOptions {
+  /** Preset size: small (100), medium (500), large (1000) products */
+  preset?: Preset
+  /** Number of products (overrides preset) */
   products?: number
+  /** Number of vendors (default: ~15% of products) */
   vendors?: number
+  /** Number of customers (default: ~20% of products) */
   customers?: number
+  /** Number of locations (default: 3-5) */
   locations?: number
+  /** Seed for reproducible generation */
   seed?: number
+}
+
+const PRESETS: Record<Preset, { products: number; vendors: number; customers: number; locations: number }> = {
+  small: { products: 100, vendors: 15, customers: 20, locations: 3 },
+  medium: { products: 500, vendors: 50, customers: 75, locations: 4 },
+  large: { products: 1000, vendors: 100, customers: 150, locations: 5 },
 }
 
 export interface BaselineData {
@@ -249,11 +264,14 @@ const productTemplates = [
 const sizes = ['Small', 'Medium', 'Large', 'XL', '1/4"', '3/8"', '1/2"', '3/4"', '1"', 'M6', 'M8', 'M10', 'M12']
 
 export function generate(options: GenerateOptions = {}): BaselineData {
+  // Apply preset defaults, then override with explicit options
+  const presetDefaults = options.preset ? PRESETS[options.preset] : PRESETS.small
+
   const {
-    products: productCount = 100,
-    vendors: vendorCount = 15,
-    customers: customerCount = 20,
-    locations: locationCount = 3,
+    products: productCount = presetDefaults.products,
+    vendors: vendorCount = presetDefaults.vendors,
+    customers: customerCount = presetDefaults.customers,
+    locations: locationCount = presetDefaults.locations,
     seed = Date.now(),
   } = options
 

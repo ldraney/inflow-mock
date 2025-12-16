@@ -1,82 +1,120 @@
 # inflow-mock
 
-Generate messy manufacturing databases and provide detection/fix libraries for common data quality patterns.
+Generate comprehensive mock databases for the inflow-get schema. 100% table coverage (37 tables) with realistic manufacturing inventory data.
 
 ## Install
 
 ```bash
-npm install
+npm install inflow-mock
 ```
 
-## Usage
-
-### Generate a Database
-
-```bash
-npm run generate                    # 100 products, seed=42
-npm run generate -- --products=200  # More products
-npm run generate -- --seed=12345    # Different seed
-```
-
-Output: `data/combined.db` (gitignored)
+## Quick Start
 
 ### As a Library
 
 ```typescript
-import { baseline, patterns, createDb, schema } from 'inflow-mock'
+import { generate, createDb, schema } from 'inflow-mock'
 
-// Generate clean baseline data
-const data = baseline.generate({ products: 100, vendors: 15, seed: 42 })
+// Using presets
+const small = generate({ preset: 'small' })   // 100 products
+const medium = generate({ preset: 'medium' }) // 500 products
+const large = generate({ preset: 'large' })   // 1000 products
 
-// Create and populate a database
-const db = createDb('./my-test.db')
-await db.insert(schema.vendors).values(data.vendors)
+// Custom options
+const data = generate({
+  products: 250,
+  vendors: 30,
+  customers: 50,
+  seed: 42  // Reproducible
+})
+
+// Write to database
+const db = createDb('./test.db')
 await db.insert(schema.products).values(data.products)
-
-// Detect issues (once patterns are implemented)
-// const dupes = patterns.duplicates.detect(db)
-// const fixes = patterns.duplicates.fix(dupes)
+await db.insert(schema.vendors).values(data.vendors)
+// ... insert other tables
 ```
 
-## What It Does
+### CLI (for local development)
 
-1. **Baseline Generator** - Creates clean, realistic manufacturing inventory data (vendors, categories, products with SKUs, reorder points, etc.)
+```bash
+npm run generate                       # small preset, seed=42
+npm run generate -- --preset=large     # 1000 products
+npm run generate -- --products=500     # Custom count
+npm run generate -- --seed=12345       # Reproducible output
+```
 
-2. **Pattern Library** - Each pattern can:
-   - `create` - Corrupt clean data in a specific way
-   - `detect` - Find instances of that corruption
-   - `fix` - Generate corrections
+Output: `data/mock.db`
 
-## Patterns
+## Presets
 
-| Pattern | Creates | Detects & Fixes |
-|---------|---------|-----------------|
-| `duplicates` | Same product, different names | Fuzzy matching & merge |
-| `missing-reorder` | Null reorder points | Stockout risk identification |
-| `sku-chaos` | Inconsistent SKU formats | Pattern detection & standardization |
-| `vendor-sprawl` | "Acme" vs "ACME Inc" | Vendor deduplication |
-| `category-mess` | Overlapping categories | Consolidation suggestions |
-| `orphaned-records` | Broken foreign keys | Reference repair |
-| `naming-anarchy` | Inconsistent product names | Convention detection |
+| Preset | Products | Vendors | Customers | Locations |
+|--------|----------|---------|-----------|-----------|
+| small  | 100      | 15      | 20        | 3         |
+| medium | 500      | 50      | 75        | 4         |
+| large  | 1000     | 100     | 150       | 5         |
+
+## Table Coverage (37/37)
+
+**Reference Data:** categories, locations, currencies, paymentTerms, pricingSchemes, taxingSchemes, taxCodes, adjustmentReasons, operationTypes
+
+**Team & Custom Fields:** teamMembers, customFieldDefinitions, customFieldDropdownOptions, customFields
+
+**Core Entities:** vendors, customers, products
+
+**Product Details:** productBarcodes, inventoryLines, itemBoms, productOperations, productPrices, reorderSettings, vendorItems
+
+**Orders:** purchaseOrders, purchaseOrderLines, salesOrders, salesOrderLines, manufacturingOrders
+
+**Stock Operations:** stockTransfers, stockTransferLines, stockAdjustments, stockAdjustmentLines, stockCounts, countSheets, countSheetLines
+
+**Cost Adjustments:** productCostAdjustments, productCostAdjustmentLines
+
+**Computed:** productSummary
 
 ## Sample Generated Data
 
 **Vendors:**
-- United Electrical Supply
-- American Tubing Corp
-- Midwest Industrial Components
+- Precision Fasteners Inc
+- Allied Steel Supply
+- Global Electronics Distributors
 
 **Products:**
-- `HB-2464` - Hex Bolt M10 x 25mm
-- `MC-5711` - Motor Controller 30A
-- `HC-2392` - Hydraulic Cylinder 6" x 36"
+- `HB-2464` - Hex Bolt M10
+- `MC-5711` - Motor Controller Large
+- `HC-2392` - Hydraulic Cylinder 3/4"
 
-## Development
+**Features:**
+- BOMs for manufacturable products
+- Operations with time/cost estimates
+- Multi-location inventory
+- Stock transfers, adjustments, counts
+- Purchase & sales order history
 
-```bash
-npm run typecheck  # Type check
-npm run build      # Compile to dist/
+## API
+
+### generate(options?)
+
+Returns `BaselineData` containing arrays for all 37 tables.
+
+```typescript
+interface GenerateOptions {
+  preset?: 'small' | 'medium' | 'large'
+  products?: number
+  vendors?: number
+  customers?: number
+  locations?: number
+  seed?: number
+}
 ```
+
+### createDb(path)
+
+Creates a Drizzle database connection.
+
+### schema
+
+Re-exports the inflow-get schema for inserts.
 
 ## License
 

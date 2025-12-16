@@ -14,27 +14,36 @@ import { fileURLToPath } from 'url'
 import { execSync } from 'child_process'
 
 import { createDb, schema } from './db/index.js'
-import { generate } from './baseline/index.js'
+import { generate, type Preset } from './baseline/index.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const DATA_DIR = resolve(__dirname, '../data')
 const DB_PATH = resolve(DATA_DIR, 'mock.db')
 
 interface GenerateConfig {
-  products: number
-  vendors: number
-  customers: number
-  locations: number
-  seed: number
+  preset?: Preset
+  products?: number
+  vendors?: number
+  customers?: number
+  locations?: number
+  seed?: number
 }
 
-function parseArgs(): Partial<GenerateConfig> {
-  const config: Partial<GenerateConfig> = {}
+function parseArgs(): GenerateConfig {
+  const config: GenerateConfig = {}
 
   for (const arg of process.argv.slice(2)) {
-    const match = arg.match(/^--(\w+)=(\d+)$/)
-    if (match) {
-      const [, key, value] = match
+    // Handle --preset=small|medium|large
+    const presetMatch = arg.match(/^--preset=(small|medium|large)$/)
+    if (presetMatch) {
+      config.preset = presetMatch[1] as Preset
+      continue
+    }
+
+    // Handle numeric args
+    const numMatch = arg.match(/^--(\w+)=(\d+)$/)
+    if (numMatch) {
+      const [, key, value] = numMatch
       if (key === 'products') config.products = parseInt(value)
       if (key === 'vendors') config.vendors = parseInt(value)
       if (key === 'customers') config.customers = parseInt(value)
@@ -47,13 +56,14 @@ function parseArgs(): Partial<GenerateConfig> {
 }
 
 async function main() {
-  const args = parseArgs()
-  const config: GenerateConfig = {
-    products: args.products ?? 100,
-    vendors: args.vendors ?? 15,
-    customers: args.customers ?? 20,
-    locations: args.locations ?? 3,
-    seed: args.seed ?? 42,
+  const config = parseArgs()
+
+  // Default to small preset with seed 42 if nothing specified
+  if (!config.preset && !config.products) {
+    config.preset = 'small'
+  }
+  if (!config.seed) {
+    config.seed = 42
   }
 
   console.log('Configuration:', config)
@@ -79,13 +89,7 @@ async function main() {
 
   // Generate baseline data
   console.log('Generating baseline data...')
-  const data = generate({
-    products: config.products,
-    vendors: config.vendors,
-    customers: config.customers,
-    locations: config.locations,
-    seed: config.seed,
-  })
+  const data = generate(config)
 
   // ============================================================================
   // Insert Reference Data (9 tables)
