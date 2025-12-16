@@ -9,6 +9,7 @@ Generate comprehensive mock data for the inflow-get schema. Proves deep expertis
 - [x] Project structure (TypeScript, Drizzle, better-sqlite3)
 - [x] Database schema (uses inflow-get schema, 37 tables)
 - [x] Complete baseline generator (all tables populated)
+- [x] Works as npm library (importable by other projects)
 
 ## Quick Start
 
@@ -28,12 +29,19 @@ data/
   mock.db    # generated, gitignored
 ```
 
+## Library Usage
+
 ```typescript
 import { generate, createDb, schema } from 'inflow-mock'
 
-// Generate clean data
+// Generate data (returns 38 collections)
 const data = generate({ products: 100, customers: 20, vendors: 15 })
-// Returns: 100 products, 20 customers, 15 vendors, 60 sales orders, etc.
+
+// Create database and insert
+const db = createDb('./test.db')  // or ':memory:' for in-memory
+db.insert(schema.products).values(data.products).run()
+db.insert(schema.customers).values(data.customers).run()
+// ... etc
 ```
 
 ## Table Coverage
