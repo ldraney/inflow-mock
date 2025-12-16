@@ -1,14 +1,75 @@
 # inflow-mock
 
-Two outputs: a messy database and a library to fix it.
+**Primary purpose: Generate a comprehensive mock database** that exercises every table in inflow-get's schema. This proves deep expertise with the data model and provides realistic test data for demos.
+
+Secondary purpose: A library to detect and fix data quality issues.
 
 ## Current Status
 
+**Table Coverage: 16/37 (43%)**
+
 - [x] Project structure (TypeScript, Drizzle, better-sqlite3)
-- [x] Database schema (uses inflow-get schema, 30+ tables)
-- [x] Baseline generator (clean manufacturing data)
+- [x] Database schema (uses inflow-get schema, 37 tables)
+- [x] Core baseline generator (products, orders, inventory)
+- [ ] Complete table coverage (see roadmap below)
 - [ ] Patterns (create/detect/fix modules)
 - [ ] Scoring system
+
+## Table Coverage Roadmap
+
+### Populated (16 tables)
+- [x] categories
+- [x] currencies
+- [x] customers
+- [x] inventoryLines
+- [x] locations
+- [x] paymentTerms
+- [x] pricingSchemes
+- [x] productPrices
+- [x] products
+- [x] purchaseOrderLines
+- [x] purchaseOrders
+- [x] reorderSettings
+- [x] salesOrderLines
+- [x] salesOrders
+- [x] vendorItems
+- [x] vendors
+
+### TODO: Reference Data (4 tables)
+- [ ] adjustmentReasons - reasons for stock adjustments
+- [ ] operationTypes - manufacturing operation types
+- [ ] taxCodes - tax codes
+- [ ] taxingSchemes - tax schemes
+
+### TODO: Team & Custom Fields (4 tables)
+- [ ] teamMembers - users/team members
+- [ ] customFieldDefinitions - custom field metadata
+- [ ] customFieldDropdownOptions - dropdown choices
+- [ ] customFields - custom field values
+
+### TODO: Product Details (3 tables)
+- [ ] productBarcodes - barcode data
+- [ ] itemBoms - bill of materials
+- [ ] productOperations - manufacturing operations
+
+### TODO: Stock Operations (7 tables)
+- [ ] stockAdjustments - inventory adjustments
+- [ ] stockAdjustmentLines - adjustment line items
+- [ ] stockTransfers - inter-location transfers
+- [ ] stockTransferLines - transfer line items
+- [ ] countSheets - stock count headers
+- [ ] countSheetLines - stock count details
+- [ ] stockCounts - count records
+
+### TODO: Cost Adjustments (2 tables)
+- [ ] productCostAdjustments - cost adjustment headers
+- [ ] productCostAdjustmentLines - cost adjustment details
+
+### TODO: Manufacturing (1 table)
+- [ ] manufacturingOrders - work orders
+
+### Computed/View (1 table)
+- [ ] productSummary - aggregated product data (may be view-only)
 
 ## Quick Start
 
@@ -21,16 +82,18 @@ npm run generate -- --seed=12345           # Reproducible output
 
 ## What This Repo Produces
 
-### 1. The Database (gitignored)
-A SQLite DB with **all known problems combined**. Every pattern's mess layered into one realistic disaster.
+### 1. The Database (primary output)
+A SQLite DB with **comprehensive mock data** covering all 37 tables in the inflow-get schema. Demonstrates deep understanding of the data model with realistic manufacturing inventory data.
 
 ```
 data/
-  combined.db    # generated, gitignored - the messy carpet
+  combined.db    # generated, gitignored
 ```
 
-### 2. The Library (the vacuum)
-Detect and fix code for each pattern. Consumers import this to identify and resolve problems.
+Goal: 100% table coverage with realistic, interconnected data.
+
+### 2. The Library (secondary output)
+Detect and fix code for each data quality pattern. Consumers import this to identify and resolve problems.
 
 ```typescript
 import { baseline, patterns, createDb, schema } from 'inflow-mock'
