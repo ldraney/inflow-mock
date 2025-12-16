@@ -2,10 +2,27 @@
 
 Two outputs: a messy database and a library to fix it.
 
+## Current Status
+
+- [x] Project structure (TypeScript, Drizzle, better-sqlite3)
+- [x] Database schema (local, TODO: swap for inflow-get)
+- [x] Baseline generator (clean manufacturing data)
+- [ ] Patterns (create/detect/fix modules)
+- [ ] Scoring system
+
+## Quick Start
+
+```bash
+npm install
+npm run generate                           # Generate combined.db
+npm run generate -- --products=200         # Custom product count
+npm run generate -- --seed=12345           # Reproducible output
+```
+
 ## What This Repo Produces
 
 ### 1. The Database (gitignored)
-A SQLite DB with **all known problems combined**. Every pattern's mess layered into one realistic disaster. This is the "before" that demos consume.
+A SQLite DB with **all known problems combined**. Every pattern's mess layered into one realistic disaster.
 
 ```
 data/
@@ -13,62 +30,50 @@ data/
 ```
 
 ### 2. The Library (the vacuum)
-Detect and fix code for each pattern. Consumers import this to identify and resolve problems - whether in the generated DB or real client data.
+Detect and fix code for each pattern. Consumers import this to identify and resolve problems.
 
 ```typescript
-import { patterns, score } from 'inflow-mock'
-
-// Detect issues
-const dupes = patterns.duplicates.detect(db)
-
-// Fix them
-const fixes = patterns.duplicates.fix(dupes)
-```
-
-## Build Order
-
-1. **Baseline** - clean data covering every entity in inflow-get's Drizzle schema, realistic manufacturing workflows
-2. **Patterns** - each pattern corrupts the baseline in a known way
-3. **Generate** - run script, output combined.db with all patterns applied
-4. **Export** - library provides detect/fix for each pattern
-
-No seed files. TypeScript generates the DB directly using Drizzle from inflow-get:
-
-```typescript
-import { db, schema } from 'inflow-get'
-import { baseline } from './baseline'
-import { patterns } from './patterns'
+import { baseline, patterns, createDb, schema } from 'inflow-mock'
 
 // Generate clean data
 const clean = baseline.generate({ products: 100, vendors: 15 })
 
-// Insert via Drizzle (type-safe)
-await db.insert(schema.products).values(clean.products)
-await db.insert(schema.vendors).values(clean.vendors)
+// Or detect/fix issues in existing data
+const dupes = patterns.duplicates.detect(db)
+const fixes = patterns.duplicates.fix(dupes)
+```
 
-// Corrupt in place
-await patterns.duplicates.create(db, { severity: 0.2 })
-await patterns.skuChaos.create(db, { severity: 0.3 })
+## Project Structure
 
-// DB now has realistic mess
+```
+src/
+├── index.ts              # Main entry point
+├── generate.ts           # CLI script to build combined.db
+├── db/
+│   ├── schema.ts         # Drizzle schema (TODO: swap for inflow-get)
+│   └── index.ts          # DB connection + table creation
+├── baseline/
+│   ├── data.ts           # Manufacturing templates
+│   ├── generator.ts      # Seeded random generator
+│   └── index.ts
+└── patterns/
+    ├── index.ts          # Pattern exports
+    ├── duplicates/
+    ├── missing-reorder/
+    ├── sku-chaos/
+    ├── vendor-sprawl/
+    ├── category-mess/
+    ├── orphaned-records/
+    └── naming-anarchy/
 ```
 
 ## The Core Insight
 
 **Patterns are symmetric.** If you can create a type of mess, you can detect and fix it. The create/detect/fix code lives together because they're two sides of the same coin.
 
-## Why This Exists
-
-We're making the carpet dirty so we can show how the vacuum works.
-
-1. **Generate the mess** - combined.db has every problem we know how to fix
-2. **Export the fixes** - library provides detect/fix for each pattern
-3. **Demos consume both** - inflow-demo imports the DB + uses the library to clean it
-4. **Real products use the library** - same detect/fix code works on client data
-
 ## Definition of Clean
 
-This is the contract. Data is "clean" when:
+Data is "clean" when:
 
 ### Products
 - Unique name (no duplicates within fuzzy threshold)
@@ -110,22 +115,19 @@ Each pattern exports three things:
 
 ```
 src/patterns/{pattern-name}/
-  create.ts    # (cleanData, options) => messyData
-  detect.ts    # SQL or function to surface the problem
+  create.ts    # (db, options) => corrupts data in place
+  detect.ts    # (db) => issues found
   fix.ts       # (issues) => fixes or SQL mutations
   index.ts     # exports { create, detect, fix }
 ```
 
 ## Adding a New Pattern
 
-When you find new mess in real client data:
-
 1. Create the pattern directory
 2. Write `create.ts` that replicates the mess
 3. Write `detect.ts` that surfaces it
 4. Write `fix.ts` that resolves it
-5. Add to the pattern index
-6. Pattern is now part of the library
+5. Add to `src/patterns/index.ts`
 
 ## Scoring
 
@@ -154,9 +156,17 @@ Weighted by severity:
 - `inflow-materialize` - views (may share detect SQL)
 - `inflow-demo` - consumes this library for demos
 
-## Tech Decisions
+## Tech Stack
 
-- TypeScript
-- Uses Drizzle schema from `inflow-get` (single source of truth for DB structure)
-- Type-safe inserts via Drizzle
-- Detect code should be portable to SQL views where possible
+- TypeScript (ESM)
+- Drizzle ORM
+- better-sqlite3
+- tsx (for running scripts)
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm run generate` | Build combined.db with baseline + patterns |
+| `npm run typecheck` | Type check without emitting |
+| `npm run build` | Compile to dist/ |
